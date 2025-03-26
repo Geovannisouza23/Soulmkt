@@ -7,36 +7,19 @@
     <link rel="stylesheet" href="paginacliente.css">
 </head>
 <body>
-    <h1>Como Fazer Upload do Arquivo CSV</h1>
-    <p>Siga os passos abaixo para fazer o upload corretamente:</p>
-    <ol>
-        <li>Certifique-se de que o arquivo está no formato <strong>.CSV</strong>.</li>
-        <li>O arquivo deve conter colunas bem definidas, como Nome, Código e Preço.</li>
-        <li>Clique no botão "Selecionar arquivo" para escolher o arquivo do seu computador.</li>
-        <li>Escolha o separador correto (vírgula ou ponto e vírgula).</li>
-        <li>Clique em "Enviar" para processar o upload.</li>
-    </ol>
-    <p>Após o envio, os produtos serão listados automaticamente na tabela.</p>
-    
-    <h1>Faça o Upload do Arquivo CSV</h1>
-    
-    <form id="uploadForm" enctype="multipart/form-data">
-        <label for="fileInput">Selecione uma planilha CSV:</label>
-        <input type="file" id="fileInput" name="fileInput" required>
-        <label for="separator">Selecione o separador:</label>
-        <select id="separator" name="separator">
-            <option value=",">Vírgula (",")</option>
-            <option value=";">Ponto e vírgula (";")</option>
-        </select>
-        <button type="submit">Enviar</button>
-    </form>
-
-    <p id="mensagem"></p>
-
-    <button onclick="window.location.href='../../index.html'">Ver Produtos</button>
-
+    <table id="productTable">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Código</th>
+                <th>Preço</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Produtos serão inseridos aqui via AJAX -->
+        </tbody>
+    </table>
     <script src="../services/script.js"></script>
-
-
 </body>
 </html>
