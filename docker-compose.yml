@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  upload:
+    build: .
+    container_name: upload-container
+    ports:
+      - "8081:80"  # Mapeia a porta 80 do container para a 8081 da máquina local
+    volumes:
+      - ./src/App:/var/www/html  # Serve a página de upload
+    networks:
+      - app-network
+
+  table:
+    build: .
+    container_name: table-container
+    ports:
+      - "8080:80"  # Mapeia a porta 80 do container para a 8080 da máquina local
+    volumes:
+      - ./src:/var/www/html  # Serve o index.html (tabela)
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
