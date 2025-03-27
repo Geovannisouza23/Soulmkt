@@ -20,12 +20,17 @@ class ProductProcessor
     private function parseCsv()
     {
         if (!file_exists($this->file) || !is_readable($this->file)) {
+            error_log("Arquivo não encontrado ou não é legível: " . $this->file);
             return [];
         }
 
         $handle = fopen($this->file, "r");
-        $rows = [];
+        if (!$handle) {
+            error_log("Erro ao abrir o arquivo: " . $this->file);
+            return [];
+        }
 
+        $rows = [];
         while (($row = fgetcsv($handle, 1000, $this->separator)) !== false) {
             $rows[] = $row;
         }
@@ -49,6 +54,7 @@ class ProductProcessor
         $priceCol = array_search('preco', $header);
 
         if ($nameCol === false || $codeCol === false || $priceCol === false) {
+            error_log("Colunas essenciais não encontradas.");
             return []; // Retorna vazio caso as colunas essenciais não sejam encontradas
         }
 
@@ -97,11 +103,15 @@ class ProductProcessor
 
 // Verificar upload e processar arquivo
 if (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] === UPLOAD_ERR_OK) {
+    // Logando o nome do arquivo recebido
+    error_log("Arquivo recebido: " . $_FILES['fileInput']['name']);
     $separator = $_POST['separator'] ?? ',';
     $file = $_FILES['fileInput']['tmp_name'];
     $processor = new ProductProcessor($file, $separator);
     $processor->process();
 } else {
+    // Exibindo erro se o upload falhar
+    error_log("Erro no upload: " . $_FILES['fileInput']['error']);
     echo json_encode(['error' => 'Nenhum arquivo foi enviado ou ocorreu um erro no upload.']);
 }
 ?>

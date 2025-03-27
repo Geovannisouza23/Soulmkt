@@ -17,6 +17,7 @@ $(document).ready(function() {
             processData: false,
             contentType: false,
             success: function(response) {
+                console.log("Resposta do servidor: ", response); // Logando a resposta do servidor
                 try {
                     var products = JSON.parse(response);
                     var tableBody = $('#productTable tbody');
@@ -47,6 +48,10 @@ $(document).ready(function() {
                     console.error('Erro ao processar JSON:', error.message, response);
                     alert('Erro ao processar os dados recebidos do servidor.');
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error("Erro na requisição AJAX:", status, error);
+                alert('Erro ao enviar o arquivo.');
             }
         });
     });
