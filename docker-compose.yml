@@ -15,9 +15,9 @@ services:
     build: .
     container_name: server-container
     ports:
-      - "8081:80" 
+      - "8101:8101" 
     volumes:
-      - ./src/server:/var/www/html  
+      - ./src/server:/var/www/html
     networks:
       - webnet
 
