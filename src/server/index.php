@@ -19,6 +19,10 @@ class ProductProcessor
 
     private function parseCsv()
     {
+        if (!file_exists($this->file) || !is_readable($this->file)) {
+            return [];
+        }
+
         $handle = fopen($this->file, "r");
         $rows = [];
 
@@ -32,23 +36,31 @@ class ProductProcessor
 
     private function filterAndSortProducts($data)
     {
+        if (empty($data) || !isset($data[0])) {
+            return [];
+        }
+
         $products = [];
-        $header = $data[0];
+        $header = array_map('strtolower', $data[0]);
 
         // Identificar colunas
-        $nameCol = array_search('nome', array_map('strtolower', $header));
-        $codeCol = array_search('codigo', array_map('strtolower', $header));
-        $priceCol = array_search('preco', array_map('strtolower', $header));
+        $nameCol = array_search('nome', $header);
+        $codeCol = array_search('codigo', $header);
+        $priceCol = array_search('preco', $header);
+
+        if ($nameCol === false || $codeCol === false || $priceCol === false) {
+            return []; // Retorna vazio caso as colunas essenciais não sejam encontradas
+        }
 
         // Processar produtos
         foreach ($data as $index => $row) {
             if ($index === 0) continue; // Ignorar cabeçalho
 
-            $name = $row[$nameCol] ?? '';
-            $code = $row[$codeCol] ?? '';
+            $name = isset($row[$nameCol]) ? trim($row[$nameCol]) : '';
+            $code = isset($row[$codeCol]) ? trim($row[$codeCol]) : '';
             $price = isset($row[$priceCol]) ? floatval($row[$priceCol]) : 0;
 
-            // Ignorar produtos sem preço ou código válido
+            // Ignorar produtos sem nome ou código válido
             if (!$name || !$code) continue;
 
             $isNegativePrice = $price < 0;
@@ -84,10 +96,12 @@ class ProductProcessor
 }
 
 // Verificar upload e processar arquivo
-if (isset($_FILES['fileInput'])) {
-    $separator = isset($_POST['separator']) ? $_POST['separator'] : ',';
+if (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] === UPLOAD_ERR_OK) {
+    $separator = $_POST['separator'] ?? ',';
     $file = $_FILES['fileInput']['tmp_name'];
     $processor = new ProductProcessor($file, $separator);
     $processor->process();
+} else {
+    echo json_encode(['error' => 'Nenhum arquivo foi enviado ou ocorreu um erro no upload.']);
 }
 ?>

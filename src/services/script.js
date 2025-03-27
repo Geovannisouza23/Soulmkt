@@ -1,13 +1,17 @@
 $(document).ready(function() {
     $('#uploadForm').on('submit', function(e) {
         e.preventDefault();
-        
-        var formData = new FormData();
-        formData.append('fileInput', $('#fileInput')[0].files[0]);
-        formData.append('separator', $('#separator').val());
+
+        var file = $('#fileInput')[0].files[0];
+        if (!file) {
+            alert('Por favor, selecione um arquivo antes de enviar.');
+            return;
+        }
+
+        var formData = new FormData(this);
 
         $.ajax({
-            url: 'src/server/index.php',
+            url: '../server/index.php', // Caminho atualizado
             type: 'POST',
             data: formData,
             processData: false,
@@ -29,16 +33,19 @@ $(document).ready(function() {
                         row.append('<td>' + product.code + '</td>');
                         row.append('<td>' + (product.price ? product.price.toFixed(2) : '0.00') + '</td>');
 
-                        var actionButton = '';
+                        // Exibir botão "Copiar" apenas se `hasEvenNumber` for true
                         if (product.hasEvenNumber) {
-                            actionButton = '<button onclick="copyToClipboard(atob(\'' + btoa(JSON.stringify(product)) + '\'))">Copiar</button>';
+                            var actionButton = '<button onclick="copyToClipboard(\'' + btoa(JSON.stringify(product)) + '\')">Copiar</button>';
+                            row.append('<td>' + actionButton + '</td>');
+                        } else {
+                            row.append('<td></td>'); // Adiciona célula vazia para manter alinhamento
                         }
-                        row.append('<td>' + actionButton + '</td>');
 
                         tableBody.append(row);
                     });
                 } catch (error) {
-                    console.error('Erro ao processar JSON:', error);
+                    console.error('Erro ao processar JSON:', error.message, response);
+                    alert('Erro ao processar os dados recebidos do servidor.');
                 }
             }
         });
@@ -46,30 +53,23 @@ $(document).ready(function() {
 });
 
 function copyToClipboard(data) {
-    if (!navigator.clipboard) {
-        fallbackCopy(data);
-        return;
-    }
-
     navigator.clipboard.writeText(data).then(() => {
-        console.log('Texto copiado para a área de transferência!');
         alert('Texto copiado!');
-    }).catch((err) => {
+    }).catch(err => {
         console.error('Falha ao copiar: ', err);
         fallbackCopy(data);
     });
 }
 
-// Método de fallback para navegadores mais antigos
+// Método de fallback para navegadores antigos
 function fallbackCopy(data) {
     var tempInput = document.createElement('textarea'); 
     tempInput.value = data;
     document.body.appendChild(tempInput);
     tempInput.select();
-    
+
     try {
         document.execCommand('copy');
-        console.log('Texto copiado com execCommand!');
         alert('Texto copiado!');
     } catch (err) {
         console.error('Falha ao copiar usando execCommand:', err);

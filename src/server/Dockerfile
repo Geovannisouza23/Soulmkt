@@ -13,7 +13,7 @@ RUN a2enmod rewrite
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Expor a porta 80 para o servidor web
-EXPOSE 810
+EXPOSE 8101
 
 # Copiar os arquivos da API para o contêiner
 COPY . /var/www/html
