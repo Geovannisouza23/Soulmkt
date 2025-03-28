@@ -103,12 +103,45 @@ class ProductProcessor
 
 // Verificar upload e processar arquivo
 if (isset($_FILES['fileInput']) && $_FILES['fileInput']['error'] === UPLOAD_ERR_OK) {
+    // Verificar se o arquivo está vazio
+    if ($_FILES['fileInput']['size'] === 0) {
+        error_log("Arquivo vazio enviado.");
+        echo json_encode(['error' => 'O arquivo está vazio.']);
+        exit;
+    }
+
     // Logando o nome do arquivo recebido
     error_log("Arquivo recebido: " . $_FILES['fileInput']['name']);
+    error_log(print_r($_FILES, true));
+    
+    // Remover caracteres especiais indesejados do nome do arquivo
+    $filename = $_FILES['fileInput']['name'];
+    $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '', $filename);  // Limpar caracteres especiais
+    
+    // Validando o tipo MIME do arquivo
+    $fileInfo = new finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $fileInfo->file($_FILES['fileInput']['tmp_name']);
+    if ($mimeType !== 'text/csv' && $mimeType !== 'text/plain') {
+        error_log("Tipo de arquivo inválido: " . $mimeType);
+        echo json_encode(['error' => 'O arquivo deve ser um CSV válido.']);
+        exit;
+    }
+    
     $separator = $_POST['separator'] ?? ',';
-    $file = $_FILES['fileInput']['tmp_name'];
-    $processor = new ProductProcessor($file, $separator);
-    $processor->process();
+    $destination = __DIR__ . "/uploads/" . basename($filename);
+
+    // Verificar se o diretório de uploads existe, caso contrário, criar
+    if (!is_dir(__DIR__ . "/uploads")) {
+        mkdir(__DIR__ . "/uploads", 0775, true);
+    }
+
+    if (move_uploaded_file($_FILES["fileInput"]["tmp_name"], $destination)) {
+        $processor = new ProductProcessor($destination, $separator);
+        $processor->process();
+    } else {
+        error_log("Erro ao mover o arquivo para o diretório de uploads.");
+        echo json_encode(['error' => 'Erro ao salvar o arquivo.']);
+    }
 } else {
     // Exibindo erro se o upload falhar
     error_log("Erro no upload: " . $_FILES['fileInput']['error']);
